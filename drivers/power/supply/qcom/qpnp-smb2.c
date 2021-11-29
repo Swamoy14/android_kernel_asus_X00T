@@ -21,7 +21,7 @@
 #include "storm-watch.h"
 #include <linux/pmic-voter.h>
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 #include <linux/of_gpio.h>
 #include <linux/pm_wakeup.h>
 #include <linux/uaccess.h>
@@ -187,7 +187,7 @@ struct smb2 {
 	bool			bad_part;
 };
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 /* Huaqin add for ZQL1650-68 Realize jeita function by fangaijun at 2018/02/03 start */
 struct smb_charger *smbchg_dev;
 /* Huaqin add for ZQL1650-68 systme suspend 1 min run sw jeita by fangaijun at 2018/02/06 start */
@@ -207,7 +207,7 @@ static int __debug_mask = 0x10;
 #else
 static int __debug_mask;
 #endif
-#endif /* CONFIG_MACH_ASUS_X00T */
+#endif /* CONFIG_MACH_ASUS_SDM660 */
 
 static int __weak_chg_icl_ua = 500000;
 static ssize_t weak_chg_icl_ua_show(struct device *dev, struct device_attribute
@@ -387,7 +387,7 @@ static int smb2_parse_dt(struct smb2 *chip)
 		}
 	}
 
-#ifdef CONFIG_MACH_ASUS_X00T /* USB alert */
+#ifdef CONFIG_MACH_ASUS_SDM660 /* USB alert */
 	if(of_find_property(node,"qcom,chg-alert-vadc",NULL)){
 		dev_err(chg->dev,"get chg_alert vadc good rc = %d \n",rc);
 	}
@@ -2486,7 +2486,7 @@ static int smb2_probe(struct platform_device *pdev)
 {
 	struct smb2 *chip;
 	struct smb_charger *chg;
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 	u8 HVDVP_reg;
 #endif
 	int rc = 0;
@@ -2494,7 +2494,7 @@ static int smb2_probe(struct platform_device *pdev)
 	int usb_present, batt_present, batt_health, batt_charge_type;
 
 	chip = devm_kzalloc(&pdev->dev, sizeof(*chip), GFP_KERNEL);
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 	printk("enter smb2_probe\n");
 #endif
 	if (!chip)
@@ -2511,7 +2511,7 @@ static int smb2_probe(struct platform_device *pdev)
 	chg->die_health = -EINVAL;
 	chg->name = "PMI";
 	
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 /* Huaqin add for ZQL1650-68 Realize jeita function by fangaijun at 2018/02/03 start */
 	asus_chg_lock = wakeup_source_register(NULL, "asus_chg_lock");
 	smbchg_dev = chg;			//ASUS BSP add globe device struct +++
@@ -2671,7 +2671,7 @@ static int smb2_probe(struct platform_device *pdev)
 
 	device_init_wakeup(chg->dev, true);
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 /* Huaqin add for ZQL1650  solve High voltage charger  cannot charge by fangaijun at 2018/3/15 start */
 	rc = smblib_read(smbchg_dev, USBIN_OPTIONS_1_CFG_REG, &HVDVP_reg);
 	rc = smblib_masked_write(smbchg_dev, USBIN_OPTIONS_1_CFG_REG, HVDCP_EN_BIT, 0x0);
@@ -2709,7 +2709,7 @@ cleanup:
 	return rc;
 }
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 /* Huaqin add for ZQL1650-68 systme suspend 1 min run sw jeita by fangaijun at 2018/02/06 start */
 #define JEITA_MINIMUM_INTERVAL (30)
 static int smb2_resume(struct device *dev)
@@ -2777,7 +2777,7 @@ static void smb2_shutdown(struct platform_device *pdev)
 				 AUTO_SRC_DETECT_BIT, AUTO_SRC_DETECT_BIT);
 }
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 /* Huaqin add for ZQL1650-68 systme suspend 1 min run sw jeita by fangaijun at 2018/02/06 start */
 static const struct dev_pm_ops smb2_pm_ops = {
 	.resume		= smb2_resume,
@@ -2794,7 +2794,7 @@ static struct platform_driver smb2_driver = {
 	.driver		= {
 		.name		= "qcom,qpnp-smb2",
 		.of_match_table	= match_table,
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 		.pm			= &smb2_pm_ops,
 #endif
 	},
