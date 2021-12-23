@@ -914,8 +914,12 @@ int fg_get_msoc(struct fg_dev *fg, int *msoc)
 	else if (*msoc == 0)
 		*msoc = 0;
 	else
-		*msoc = DIV_ROUND_CLOSEST((*msoc - 1) * (FULL_CAPACITY - 2),
-				FULL_SOC_RAW - 2) + 1;
+		*msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY,
+				FULL_SOC_RAW);
+
+	if (*msoc >= FULL_CAPACITY)
+		*msoc = FULL_CAPACITY;
+	
 	return 0;
 }
 
@@ -1689,7 +1693,7 @@ void fg_stay_awake(struct fg_dev *fg, int awake_reason)
 	spin_lock(&fg->awake_lock);
 
 	if (!fg->awake_status)
-		pm_stay_awake(fg->dev);
+		pm_wakeup_event(fg->dev, 500);
 
 	fg->awake_status |= awake_reason;
 

@@ -311,7 +311,7 @@ struct smb_charger {
 	struct delayed_work	uusb_otg_work;
 	struct delayed_work	bb_removal_work;
 
-#ifdef CONFIG_MACH_ASUS_X00T	
+#ifdef CONFIG_MACH_ASUS_SDM660	
 /* Huaqin modify for ZQL1650-70 Identify Adapter ID by fangaijun at 2018/02/8 start */
 	struct delayed_work	asus_chg_flow_work;
 	struct delayed_work	asus_adapter_adc_work;
@@ -396,7 +396,7 @@ struct smb_charger {
 	int			die_health;
 };
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 /* Huaqin modify for ZQL1650-70 Identify Adapter ID by fangaijun at 2018/02/8 start */
 //ASUS BSP : Add gpio control struct +++
 struct gpio_control {
