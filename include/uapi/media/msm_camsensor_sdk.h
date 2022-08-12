@@ -260,6 +260,9 @@ enum msm_camera_i2c_operation {
 	/*Huaqin add third supply front camera hi846 tsp by lizihao at 2018/04/10 start*/
 	MSM_CAM_SINGLE_LOOP_READ,
 	/*Huaqin add third supply front camera hi846 tsp by lizihao at 2018/04/10 end*/
+	MSM_CAM_READ_PAGE,
+	MSM_CAM_WRITE_DELAYUSEC,
+	MSM_CAM_READ_CONTINUOUS,
 };
 
 struct msm_sensor_i2c_sync_params {
