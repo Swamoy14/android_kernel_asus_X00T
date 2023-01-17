@@ -962,7 +962,7 @@ static int fg_awake_cb(struct votable *votable, void *data, int awake,
 	struct fg_dev *fg = data;
 
 	if (awake)
-		pm_stay_awake(fg->dev);
+		pm_wakeup_event(fg->dev, 500);
 	else
 		pm_relax(fg->dev);
 
@@ -1567,7 +1567,7 @@ static int fg_charge_full_update(struct fg_dev *fg)
 			fg_dbg(fg, FG_STATUS, "Terminated charging @ SOC%d\n",
 				msoc);
 		}
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 	} else if ((msoc_raw <= recharge_soc || !fg->charge_done) && fg->charge_full) {
 #else
 	} else if ((msoc_raw <= recharge_soc || !fg->charge_done)
@@ -3174,8 +3174,13 @@ static int fg_get_time_to_full_locked(struct fg_dev *fg, int *val)
 	vbatt_avg /= MILLI_UNIT;
 
 	/* clamp ibatt_avg to iterm */
-	if (ibatt_avg < abs(chip->dt.sys_term_curr_ma))
-		ibatt_avg = abs(chip->dt.sys_term_curr_ma);
+	if (msoc <= 90) {
+		if (ibatt_avg < 1000)
+			ibatt_avg = 1000; /* force consistent minumum charging current 1000mA upto 90% battery */
+	} else {
+		if (ibatt_avg < abs(chip->dt.sys_term_curr_ma))
+			ibatt_avg = abs(chip->dt.sys_term_curr_ma);
+	}
 
 	fg_dbg(fg, FG_TTF, "ibatt_avg=%d\n", ibatt_avg);
 	fg_dbg(fg, FG_TTF, "vbatt_avg=%d\n", vbatt_avg);
@@ -4424,6 +4429,7 @@ static int fg_hw_init(struct fg_dev *fg)
 	return 0;
 }
 
+#ifndef CONFIG_MACH_ASUS_SDM660
 static int fg_adjust_timebase(struct fg_dev *fg)
 {
 	struct fg_gen3_chip *chip = container_of(fg, struct fg_gen3_chip, fg);
@@ -4458,6 +4464,7 @@ static int fg_adjust_timebase(struct fg_dev *fg)
 
 	return 0;
 }
+#endif
 
 /* INTERRUPT HANDLERS STAY HERE */
 
@@ -4570,9 +4577,11 @@ static irqreturn_t fg_delta_batt_temp_irq_handler(int irq, void *data)
 	fg->health = prop.intval;
 
 	if (fg->last_batt_temp != batt_temp) {
+#ifndef CONFIG_MACH_ASUS_SDM660
 		rc = fg_adjust_timebase(fg);
 		if (rc < 0)
 			pr_err("Error in adjusting timebase, rc=%d\n", rc);
+#endif
 
 		rc = fg_adjust_recharge_voltage(fg);
 		if (rc < 0)
@@ -4648,9 +4657,11 @@ static irqreturn_t fg_delta_msoc_irq_handler(int irq, void *data)
 	if (rc < 0)
 		pr_err("Error in validating ESR, rc=%d\n", rc);
 
+#ifndef CONFIG_MACH_ASUS_SDM660
 	rc = fg_adjust_timebase(fg);
 	if (rc < 0)
 		pr_err("Error in adjusting timebase, rc=%d\n", rc);
+#endif
 
 	if (batt_psy_initialized(fg))
 		power_supply_changed(fg->batt_psy);
@@ -5135,7 +5146,7 @@ static int fg_parse_dt(struct fg_gen3_chip *chip)
 				rc);
 	}
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 	printk("enter fg_parse_dt :HW jeita cold:%d,cool:%d,warm:%d,hot:%d\n", chip->dt.jeita_thresholds[JEITA_COLD],chip->dt.jeita_thresholds[JEITA_COOL] ,chip->dt.jeita_thresholds[JEITA_WARM],chip->dt.jeita_thresholds[JEITA_HOT]); 
 #endif
 
@@ -5682,7 +5693,7 @@ static void fg_gen3_shutdown(struct platform_device *pdev)
 	struct fg_dev *fg = &chip->fg;
 	int rc, bsoc;
 
-#ifdef CONFIG_MACH_ASUS_X00T
+#ifdef CONFIG_MACH_ASUS_SDM660
 	u8 mask;
 	u8 status;
 	rc = fg_read(fg, BATT_INFO_BATT_MISS_CFG(fg), &status, 1);
