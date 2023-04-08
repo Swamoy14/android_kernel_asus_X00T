@@ -1740,3 +1740,4 @@ exit_netlink:
 
 core_initcall(thermal_init);
 fs_initcall(thermal_netlink_init);
+module_exit(thermal_exit);
