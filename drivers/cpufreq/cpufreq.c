@@ -2266,7 +2266,7 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 			CPUFREQ_ADJUST, new_policy);
 
-#ifdef CONFIG_MACH_LONGCHEER
+#ifdef CONFIG_MACH_ASUS
 	/* the adjusted frequency should not exceed thermal limit*/
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 			CPUFREQ_THERMAL, new_policy);
